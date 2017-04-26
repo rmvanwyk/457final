@@ -3,7 +3,8 @@ import sys
 import re
 
 class my_table:
-	def __init__(self, file):
+	def __init__(self, file, name):
+		self.name = name
 		self.filename = file
 		self.rows = 0
 		self.cols = 0
@@ -30,15 +31,21 @@ class db:
 	def __init__(self, T1, T2, T3):
 		self.tables = [T1, T2, T3]
 	
-	def cart_prod(self, x, y):
-		T1 = self.tables[x-1]
-		T2 = self.tables[y-1]
-		product = my_table("prod")	
+	def cart_prod(self, T1, T2, lvl):
+		#T1 = self.tables[x-1]
+		#T2 = self.tables[y-1]
+		level=lvl
+		product = my_table("prod", 4)	
 		for i in range(0, T1.rows):
 			for j in range(0, T2.rows):
-				new_row = T1.table[j] + T2.table[j]
-				product.table.append(new_row)
-		product.rows = T1.rows * T2.rows
+				if T1.table[i][1] == T2.table[j][1]:
+
+					if T1.table[i][T1.cols-1]<=level:
+						print(T1.table[i][T1.cols-1])
+						print(lvl)
+						new_row = T1.table[i] + T2.table[j]
+						product.table.append(new_row)
+						product.rows += 1
 		product.cols = T1.cols + T2.cols
 		product.meta = T1.meta + T2.meta
 		return product		
@@ -83,22 +90,30 @@ class query:
 		self.selectc = selectc
 		self.fromc = fromc
 		self.wherec = wheref	
-		print(self.level)	
-		print(self.selectc)	
-		print(self.fromc)	
-		print(self.wherec)	
-
+	
+	def process(self, data, quer):
+		if (len(data.tables) == 2):
+			P = my_table("",4)
+			P = data.cart_prod(data.tables[0], data.tables[1], quer.level)
+		if (len(data.tables) == 3):
+			P = my_table("",4)
+			P = data.cart_prod(data.tables[0], data.tables[1], quer.level)
+			P = P.cart_prod(P.table, data.tables[2], quer.level)
+				
+			
 def main():
-	T1 = my_table("T1.txt")
+	T1 = my_table("T1.txt",1)
 	T1.create_table()
-	T2 = my_table("T2.txt")
+	T2 = my_table("T2.txt",2)
 	T2.create_table()
-	T3 = my_table("T3.txt")
+	T3 = my_table("T3.txt",3)
 	T3.create_table()
 	data = db(T1, T2, T3)
-	T4 = data.cart_prod(1, 2)
-	Q = query()
-	Q.prompt()
+	T4 = data.cart_prod(data.tables[0], data.tables[1], 4)
+	display_table(T4)
+	#Q = query()
+	#Q.prompt()
+	#Q.process(data) 
 	#display_table(T1)
 	#display_table(T2)
 	#display_table(T3)
