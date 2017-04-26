@@ -32,20 +32,14 @@ class db:
 		self.tables = [T1, T2, T3]
 	
 	def cart_prod(self, T1, T2, lvl):
-		#T1 = self.tables[x-1]
-		#T2 = self.tables[y-1]
-		level=lvl
+		print(lvl)
 		product = my_table("prod", 4)	
 		for i in range(0, T1.rows):
-			for j in range(0, T2.rows):
-				if T1.table[i][1] == T2.table[j][1]:
-
-					if T1.table[i][T1.cols-1]<=level:
-						print(T1.table[i][T1.cols-1])
-						print(lvl)
-						new_row = T1.table[i] + T2.table[j]
-						product.table.append(new_row)
-						product.rows += 1
+			for j in range(0, T2.rows): 
+				if int(T1.table[i][T1.cols-1]) <= lvl and int(T2.table[j][T2.cols-1]) and int(T1.table[i][1]) == int(T2.table[j][1]):
+                                        new_row = T1.table[i] + T2.table[j]
+                                        product.table.append(new_row)
+                                        product.rows += 1
 		product.cols = T1.cols + T2.cols
 		product.meta = T1.meta + T2.meta
 		return product		
@@ -109,7 +103,7 @@ def main():
 	T3 = my_table("T3.txt",3)
 	T3.create_table()
 	data = db(T1, T2, T3)
-	T4 = data.cart_prod(data.tables[0], data.tables[1], 4)
+	T4 = data.cart_prod(data.tables[0], data.tables[1], 2)
 	display_table(T4)
 	#Q = query()
 	#Q.prompt()
