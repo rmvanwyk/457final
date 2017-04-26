@@ -49,6 +49,45 @@ def display_table(T1):
 		for j in range(0, T1.cols):
 			sys.stdout.write(T1.table[i][j] + "\t")
 		print(" ")
+class query:
+	def __init__(self):
+		self.level = 0
+		self.selectc = []
+		self.fromc = []
+		self.wherec = []
+
+	def prompt(self):
+		scan = Scanner("")
+		sys.stdout.write("Level: ")
+		level = scan.readint()
+		sys.stdout.write("SELECT: ")
+		selectc = scan.readline()	
+		sys.stdout.write("FROM: ")
+		fromc = scan.readline()	
+		sys.stdout.write("WHERE: ")
+		wherec = scan.readline()
+		wherec = wherec.strip()
+		wherec = wherec.split(" ")
+		wheref = []
+		i = 0
+		while (i < len(wherec)):
+			wheref += wherec[i].split("=")
+			i += 1
+		wheref2 = wheref[len(wheref)-1].replace(";","")
+		wheref[len(wheref)-1] = wheref2	
+		fromc = fromc.strip()
+		fromc = fromc.split(",")	
+		selectc = selectc.strip()
+		selectc = selectc.split(",")
+		self.level = level
+		self.selectc = selectc
+		self.fromc = fromc
+		self.wherec = wheref	
+		print(self.level)	
+		print(self.selectc)	
+		print(self.fromc)	
+		print(self.wherec)	
+
 def main():
 	T1 = my_table("T1.txt")
 	T1.create_table()
@@ -58,6 +97,8 @@ def main():
 	T3.create_table()
 	data = db(T1, T2, T3)
 	T4 = data.cart_prod(1, 2)
+	Q = query()
+	Q.prompt()
 	#display_table(T1)
 	#display_table(T2)
 	#display_table(T3)
