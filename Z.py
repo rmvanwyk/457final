@@ -160,10 +160,8 @@ class query:
 			for i in range(0, len(colNums)):
 				T2.meta.append(T.meta[colNums[i]])
 			for i in range(0, T.rows):
-				print(i)
 				for j in range(0, len(colNums)):
 					row.append(T.table[i][colNums[j]])
-					print(row)
 				T2.table.append(row)
 				T2.rows += 1
 				row = []
