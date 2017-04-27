@@ -68,15 +68,17 @@ class query:
 
 	def prompt(self):
 		scan = Scanner("")
-		#sys.stdout.write("Enter Level, Then Query:\n")
-		sys.stdout.write("Level: ")
+		sys.stdout.write("Enter Level, Then Query:\n")
 		level = scan.readint()
-		sys.stdout.write("SELECT: ")
-		selectc = scan.readline()
-		sys.stdout.write("FROM: ")
-		fromc = scan.readline()
-		sys.stdout.write("WHERE: ")
-		wherec = scan.readline()
+		s = scan.readline()
+		s = s[7:]
+		selectc = s
+		s = scan.readline()
+		s = s[5:]
+		fromc = s
+		s = scan.readline()
+		s = s[6:]
+		wherec = s
 		wherec = wherec.strip()
 		wherec = wherec.split("and")
 		wheref = []
