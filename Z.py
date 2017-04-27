@@ -89,6 +89,7 @@ class query:
 			i += 1
 		wheref2 = wheref[len(wheref)-1][1].replace(";","")
 		wheref[len(wheref)-1][1] = wheref2
+		print(wheref)
 		fromc = fromc.strip()
 		fromc = fromc.split(", ")
 		selectc = selectc.strip()
@@ -100,7 +101,7 @@ class query:
 
 	def process(self, data):
 		TempTable = my_table()
-      		#FullTable = my_table()
+      	#FullTable = my_table()
 		for i in range(0, len(data.tables)):
 			if self.fromc[0] == data.tables[i].name:
 				TempTable = data.tables[i]
@@ -116,24 +117,25 @@ class query:
 			InterTable = my_table()
 			InterTable.meta = TempTable.meta
 			InterTable.cols = TempTable.cols
-      		for j in range(0, (len(self.wherec[i])-1)):
-    			cond1 = self.wherec[i][j]
-    			cond2 = self.wherec[i][j+1]
-    			c1index = TempTable.meta.index(cond1)
-    			if cond2.isdigit():
-      				for k in range(0, TempTable.rows):
-      					if int(TempTable.table[k][c1index]) == int(cond2) and int(TempTable.table[k][TempTable.cols-1]) <= self.level:
+			for j in range(0, (len(self.wherec[i])-1)):
+				cond1 = self.wherec[i][j]
+				cond2 = self.wherec[i][j+1]
+				c1index = TempTable.meta.index(cond1)
+				if cond2.isdigit():
+					for k in range(0, TempTable.rows):
+						if int(TempTable.table[k][c1index]) == int(cond2) and int(TempTable.table[k][TempTable.cols-1]) <= self.level:
 							row = TempTable.table[k]
 							InterTable.table.append(row)
 							InterTable.rows += 1
-    			else:
-      				c2index = TempTable.meta.index(cond2)
-      				for k in range(0, TempTable.rows):
-      					if int(TempTable.table[k][c1index]) == int(TempTable.table[k][c2index]) and int(TempTable.table[k][TempTable.cols-1]) <= self.level:
+				else:
+					c2index = TempTable.meta.index(cond2)
+					for k in range(0, TempTable.rows):
+						if int(TempTable.table[k][c1index]) == int(TempTable.table[k][c2index]) and int(TempTable.table[k][TempTable.cols-1]) <= self.level:
 							row = TempTable.table[k]
 							InterTable.table.append(row)
 							InterTable.rows += 1
 			TempTable = InterTable
+			#display_table(TempTable)
 			j+=1
 			#FullTable = TempTable
 		return TempTable
