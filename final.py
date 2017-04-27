@@ -86,10 +86,6 @@ class query:
 		self.selectc = selectc
 		self.fromc = fromc
 		self.wherec = wheref	
-		print(self.level)
-		print(self.selectc)
-		print(self.fromc)
-		print(self.wherec)
 	
 	def process(self, data):
 		TempTable = my_table()
@@ -104,7 +100,6 @@ class query:
                 		for j in range(0, len(data.tables)):
 					if self.fromc[i] == data.tables[j].name:
 						TempTable = data.cart_prod(TempTable, data.tables[j], self.level)
-        					#display_table(TempTable)
 		FullTable.meta = TempTable.meta
 		FullTable.cols = TempTable.cols
 		for i in range(0, (len(self.wherec))):
@@ -116,14 +111,12 @@ class query:
             			if cond2.isdigit():
               				t = 4
             			else:
-					print(TempTable.meta)												
               				c2index = TempTable.meta.index(cond2)
               				for k in range(0, TempTable.rows):
               					if int(TempTable.table[k][c1index]) == int(TempTable.table[k][c2index]): 
 							row = TempTable.table[k]
               						InterTable.table.append(row)
 							InterTable.rows += 1	
-							display_table(InterTable)	
 				FullTable = InterTable             
 				j+=1
 			TempTable = InterTable
