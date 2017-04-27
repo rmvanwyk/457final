@@ -3,8 +3,8 @@ import sys
 import re
 
 class my_table:
-	def __init__(self, file, name):
-		self.name
+	def __init__(self, file = None, name = None):
+		self.name = name
 		self.filename = file
 		self.rows = 0
 		self.cols = 0
@@ -32,16 +32,17 @@ class db:
 		self.tables = [T1, T2, T3]
 	
 	def cart_prod(self, T1, T2, lvl):
-		print(lvl)
 		product = my_table("prod", 4)	
+		product.meta = T1.meta[0:T1.cols-1] + T2.meta
+		product.cols = T1.cols-1 + T2.cols
 		for i in range(0, T1.rows):
 			for j in range(0, T2.rows): 
-				if int(T1.table[i][T1.cols-1]) <= lvl and int(T2.table[j][T2.cols-1]) and int(T1.table[i][1]) == int(T2.table[j][1]):
-                                        new_row = T1.table[i] + T2.table[j]
+				if int(T1.table[i][T1.cols-1]) <= lvl and int(T2.table[j][T2.cols-1]) <= lvl and int(T1.table[i][1]) == int(T2.table[j][1]):
+					TC = max(int(T1.table[i][T1.cols-1]), int(T2.table[j][T2.cols-1]))
+                                        new_row = T1.table[i][0:T1.cols-1] + T2.table[j]
+					new_row[len(new_row)-1] = str(TC)                    #possible source of error???
                                         product.table.append(new_row)
                                         product.rows += 1
-		product.cols = T1.cols + T2.cols
-		product.meta = T1.meta + T2.meta
 		return product		
 
 def display_table(T1):
@@ -68,18 +69,19 @@ class query:
 		sys.stdout.write("WHERE: ")
 		wherec = scan.readline()
 		wherec = wherec.strip()
-		wherec = wherec.split(" ")
+    		wherec = wherec.split("and")
 		wheref = []
 		i = 0
 		while (i < len(wherec)):
-			wheref += wherec[i].split("=")
+			wherec[i] = wherec[i].strip()
+			wheref.append(wherec[i].split("="))
 			i += 1
-		wheref2 = wheref[len(wheref)-1].replace(";","")
-		wheref[len(wheref)-1] = wheref2	
+		wheref2 = wheref[len(wheref)-1][1].replace(";","")
+		wheref[len(wheref)-1][1] = wheref2
 		fromc = fromc.strip()
-		fromc = fromc.split(",")	
+		fromc = fromc.split(", ")	
 		selectc = selectc.strip()
-		selectc = selectc.split(",")
+		selectc = selectc.split(", ")
 		self.level = level
 		self.selectc = selectc
 		self.fromc = fromc
@@ -90,14 +92,42 @@ class query:
 		print(self.wherec)
 	
 	def process(self, data):
-		if (len(self.fromc) == 2):
-			P = my_table("",4)
-			P = data.cart_prod(data.tables[0], data.tables[1], quer.level)
-		if (len(data.tables) == 3):
-			P = my_table("",4)
-			P = data.cart_prod(data.tables[0], data.tables[1], quer.level)
-			P = P.cart_prod(P.table, data.tables[2], quer.level)
-					
+		TempTable = my_table()
+      		FullTable = my_table()
+      		InterTable = my_table()
+		for i in range(0, len(data.tables)):
+			if self.fromc[0] == data.tables[i].name:
+				TempTable = data.tables[i]
+				break	
+		if len(self.fromc) > 1:
+			for i in range(1, (len(self.fromc))):
+                		for j in range(0, len(data.tables)):
+					if self.fromc[i] == data.tables[j].name:
+						TempTable = data.cart_prod(TempTable, data.tables[j], self.level)
+        					#display_table(TempTable)
+		FullTable.meta = TempTable.meta
+		FullTable.cols = TempTable.cols
+		for i in range(0, (len(self.wherec))):
+          		InterTable = FullTable
+          		for j in range(0, (len(self.wherec[i])-1)):
+            			cond1 = self.wherec[i][j]
+            			cond2 = self.wherec[i][j+1]
+            			c1index = TempTable.meta.index(cond1)
+            			if cond2.isdigit():
+              				t = 4
+            			else:
+					print(TempTable.meta)												
+              				c2index = TempTable.meta.index(cond2)
+              				for k in range(0, TempTable.rows):
+              					if int(TempTable.table[k][c1index]) == int(TempTable.table[k][c2index]): 
+							row = TempTable.table[k]
+              						InterTable.table.append(row)
+							InterTable.rows += 1	
+							display_table(InterTable)	
+				FullTable = InterTable             
+				j+=1
+			TempTable = InterTable
+		display_table(FullTable)	
 			
 def main():
 	T1 = my_table("T1.txt","T1")
@@ -107,11 +137,12 @@ def main():
 	T3 = my_table("T3.txt","T3")
 	T3.create_table()
 	data = db(T1, T2, T3)
+	#print(T3.meta)	
 	#T4 = data.cart_prod(data.tables[0], data.tables[1], 2)
 	#display_table(T4)
 	Q = query()
 	Q.prompt()
-	#Q.process(data) 
+	Q.process(data) 
 	#display_table(T1)
 	#display_table(T2)
 	#display_table(T3)
