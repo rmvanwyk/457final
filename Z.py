@@ -27,6 +27,14 @@ class my_table:
 			input = scan.readline()
 			self.rows += 1
 
+	def isPK(self, i):
+		if self.meta[i] == "A1":
+			return True
+		elif self.meta[i] == "B1":
+			return True
+		elif self.meta[i] == "C1":
+			return True
+
 class db:
 	def __init__(self, T1, T2, T3):
 		self.tables = [T1, T2, T3]
@@ -144,6 +152,11 @@ class query:
 	def select_cols(self,T):
 		#if selectc[0] != * , iterate through Select Array
 		if self.selectc[0]=='*':
+			kci = 1
+			for i in range(0, len(T.meta)):
+				if T.meta[i] == "KC":
+					T.meta[i]= "KC"+str(kci)
+					kci+=1
 			return T
 		else:
 			T2 = my_table()
@@ -154,8 +167,8 @@ class query:
 				if colin not in colNums:
 					colNums.append(colin)
 					T2.cols += 1
-				if 0 in colNums and 1 not in colNums:
-					colNums.append(1)
+				if T.isPK(colin):
+					colNums.append(T.meta.index(sc)+1)
 					T2.cols += 1
 				#if Primary Key Requested, display KC also
 			if (T.cols-1) not in colNums:
