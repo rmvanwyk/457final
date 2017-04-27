@@ -152,16 +152,19 @@ class query:
 					colNums.append(colin)
 					T2.cols += 1
 				#if Primary Key Requested, display KC also
-			colNums.append(T.cols-1)
-			T2.cols += 1
+			if (T.cols-1) not in colNums:
+				colNums.append(T.cols-1)
+				T2.cols += 1
 			row = []
 			#Get Meta
 			for i in range(0, len(colNums)):
 				T2.meta.append(T.meta[colNums[i]])
 			for i in range(0, T.rows):
+				print(i)
 				for j in range(0, len(colNums)):
 					row.append(T.table[i][colNums[j]])
 					T2.table.append(row)
+					print(row)
 					T2.rows += 1
 				row = []
 			#get each index, add that column to new table T2
