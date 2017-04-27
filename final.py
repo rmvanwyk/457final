@@ -33,8 +33,6 @@ class db:
 	
 	def cart_prod(self, T1, T2, lvl):
 		product = my_table("prod", 4)	
-		product.meta = T1.meta[0:T1.cols-1] + T2.meta
-		product.cols = T1.cols-1 + T2.cols
 		for i in range(0, T1.rows):
 			for j in range(0, T2.rows): 
 				if int(T1.table[i][T1.cols-1]) <= lvl and int(T2.table[j][T2.cols-1]) <= lvl and int(T1.table[i][1]) == int(T2.table[j][1]):
@@ -43,6 +41,8 @@ class db:
 					new_row[len(new_row)-1] = str(TC)                    #possible source of error???
                                         product.table.append(new_row)
                                         product.rows += 1
+		product.meta = T1.meta[0:T1.cols-1] + T2.meta
+		product.cols = T1.cols-1 + T2.cols
 		return product		
 
 def display_table(T1):
@@ -89,8 +89,7 @@ class query:
 	
 	def process(self, data):
 		TempTable = my_table()
-      		FullTable = my_table()
-      		InterTable = my_table()
+      		#FullTable = my_table()
 		for i in range(0, len(data.tables)):
 			if self.fromc[0] == data.tables[i].name:
 				TempTable = data.tables[i]
@@ -100,27 +99,33 @@ class query:
                 		for j in range(0, len(data.tables)):
 					if self.fromc[i] == data.tables[j].name:
 						TempTable = data.cart_prod(TempTable, data.tables[j], self.level)
-		FullTable.meta = TempTable.meta
-		FullTable.cols = TempTable.cols
+		#FullTable.meta = TempTable.meta
+		#FullTable.cols = TempTable.cols
 		for i in range(0, (len(self.wherec))):
-          		InterTable = FullTable
+          		InterTable = my_table()
+			InterTable.meta = TempTable.meta
+			InterTable.cols = TempTable.cols
           		for j in range(0, (len(self.wherec[i])-1)):
             			cond1 = self.wherec[i][j]
             			cond2 = self.wherec[i][j+1]
             			c1index = TempTable.meta.index(cond1)
             			if cond2.isdigit():
-              				t = 4
-            			else:
-              				c2index = TempTable.meta.index(cond2)
               				for k in range(0, TempTable.rows):
-              					if int(TempTable.table[k][c1index]) == int(TempTable.table[k][c2index]): 
+              					if int(TempTable.table[k][c1index]) == int(cond2) and int(TempTable.table[k][TempTable.cols-1]) <= self.level: 
 							row = TempTable.table[k]
               						InterTable.table.append(row)
 							InterTable.rows += 1	
-				FullTable = InterTable             
+            			else:
+              				c2index = TempTable.meta.index(cond2)
+              				for k in range(0, TempTable.rows):
+              					if int(TempTable.table[k][c1index]) == int(TempTable.table[k][c2index]) and int(TempTable.table[k][TempTable.cols-1]) <= self.level: 
+							row = TempTable.table[k]
+              						InterTable.table.append(row)
+							InterTable.rows += 1	
+				TempTable = InterTable             
 				j+=1
-			TempTable = InterTable
-		display_table(FullTable)	
+			#FullTable = TempTable
+		return TempTable	
 			
 def main():
 	T1 = my_table("T1.txt","T1")
@@ -130,14 +135,9 @@ def main():
 	T3 = my_table("T3.txt","T3")
 	T3.create_table()
 	data = db(T1, T2, T3)
-	#print(T3.meta)	
-	#T4 = data.cart_prod(data.tables[0], data.tables[1], 2)
-	#display_table(T4)
 	Q = query()
 	Q.prompt()
-	Q.process(data) 
-	#display_table(T1)
-	#display_table(T2)
-	#display_table(T3)
-	#display_table(T4)
+	T4 = my_table()
+	T4 = Q.process(data) 
+	display_table(T4)
 main()
