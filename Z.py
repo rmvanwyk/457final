@@ -89,7 +89,6 @@ class query:
 			i += 1
 		wheref2 = wheref[len(wheref)-1][1].replace(";","")
 		wheref[len(wheref)-1][1] = wheref2
-		print(wheref)
 		fromc = fromc.strip()
 		fromc = fromc.split(", ")
 		selectc = selectc.strip()
@@ -120,6 +119,8 @@ class query:
 			for j in range(0, (len(self.wherec[i])-1)):
 				cond1 = self.wherec[i][j]
 				cond2 = self.wherec[i][j+1]
+				if cond1 == "TC" and int(cond2) > self.level:
+					raise ValueError('ERROR: No Results Available.')
 				c1index = TempTable.meta.index(cond1)
 				if cond2.isdigit():
 					for k in range(0, TempTable.rows):
@@ -153,14 +154,22 @@ class query:
 				if colin not in colNums:
 					colNums.append(colin)
 					T2.cols += 1
+				if 0 in colNums and 1 not in colNums:
+					colNums.append(1)
+					T2.cols += 1
 				#if Primary Key Requested, display KC also
 			if (T.cols-1) not in colNums:
 				colNums.append(T.cols-1)
 				T2.cols += 1
 			row = []
 			#Get Meta
+			kci = 1
 			for i in range(0, len(colNums)):
-				T2.meta.append(T.meta[colNums[i]])
+				if T.meta[colNums[i]] == "KC":
+					T2.meta.append("KC"+str(kci))
+					kci+=1
+				else:
+					T2.meta.append(T.meta[colNums[i]])
 			for i in range(0, T.rows):
 				for j in range(0, len(colNums)):
 					row.append(T.table[i][colNums[j]])
@@ -179,11 +188,11 @@ def main():
 	T3 = my_table("T3.txt","T3")
 	T3.create_table()
 	data = db(T1, T2, T3)
-	while (1):
-		Q = query()
-		Q.prompt()
-		T4 = my_table()
-		T4 = Q.process(data)
-		T4 = Q.select_cols(T4)
-		display_table(T4)
+	#while (1):
+	Q = query()
+	Q.prompt()
+	T4 = my_table()
+	T4 = Q.process(data)
+	T4 = Q.select_cols(T4)
+	display_table(T4)
 main()
