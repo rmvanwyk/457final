@@ -4,7 +4,7 @@ import re
 
 class my_table:
 	def __init__(self, file, name):
-		self.name = name
+		self.name
 		self.filename = file
 		self.rows = 0
 		self.cols = 0
@@ -84,29 +84,33 @@ class query:
 		self.selectc = selectc
 		self.fromc = fromc
 		self.wherec = wheref	
+		print(self.level)
+		print(self.selectc)
+		print(self.fromc)
+		print(self.wherec)
 	
-	def process(self, data, quer):
-		if (len(data.tables) == 2):
+	def process(self, data):
+		if (len(self.fromc) == 2):
 			P = my_table("",4)
 			P = data.cart_prod(data.tables[0], data.tables[1], quer.level)
 		if (len(data.tables) == 3):
 			P = my_table("",4)
 			P = data.cart_prod(data.tables[0], data.tables[1], quer.level)
 			P = P.cart_prod(P.table, data.tables[2], quer.level)
-				
+					
 			
 def main():
-	T1 = my_table("T1.txt",1)
+	T1 = my_table("T1.txt","T1")
 	T1.create_table()
-	T2 = my_table("T2.txt",2)
+	T2 = my_table("T2.txt","T2")
 	T2.create_table()
-	T3 = my_table("T3.txt",3)
+	T3 = my_table("T3.txt","T3")
 	T3.create_table()
 	data = db(T1, T2, T3)
-	T4 = data.cart_prod(data.tables[0], data.tables[1], 2)
-	display_table(T4)
-	#Q = query()
-	#Q.prompt()
+	#T4 = data.cart_prod(data.tables[0], data.tables[1], 2)
+	#display_table(T4)
+	Q = query()
+	Q.prompt()
 	#Q.process(data) 
 	#display_table(T1)
 	#display_table(T2)
