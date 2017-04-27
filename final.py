@@ -161,9 +161,9 @@ class query:
 				print(i)
 				for j in range(0, len(colNums)):
 					row.append(T.table[i][colNums[j]])
-					T2.rows += 1
 					print(row)
 				T2.table.append(row)
+				T2.rows += 1
 				row = []
 			#get each index, add that column to new table T2
 			#return T2
