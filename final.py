@@ -8,7 +8,6 @@ class my_table:
 		self.filename = file
 		self.rows = 0
 		self.cols = 0
-		self.col_name = ""
 		self.table = []
 		self.meta = [] 
 
@@ -45,12 +44,6 @@ class db:
 		product.cols = T1.cols-1 + T2.cols
 		return product		
 
-def display_table(T1):
-	print(T1.meta)
-	for i in range(0, T1.rows):
-		for j in range(0, T1.cols):
-			sys.stdout.write(T1.table[i][j] + "\t")
-		print(" ")
 class query:
 	def __init__(self):
 		self.level = 0
@@ -60,13 +53,13 @@ class query:
 
 	def prompt(self):
 		scan = Scanner("")
-		sys.stdout.write("Level: ")
+		sys.stdout.write("Level ")
 		level = scan.readint()
-		sys.stdout.write("SELECT: ")
+		sys.stdout.write("SELECT ")
 		selectc = scan.readline()	
-		sys.stdout.write("FROM: ")
+		sys.stdout.write("FROM ")
 		fromc = scan.readline()	
-		sys.stdout.write("WHERE: ")
+		sys.stdout.write("WHERE ")
 		wherec = scan.readline()
 		wherec = wherec.strip()
     		wherec = wherec.split("and")
@@ -89,7 +82,6 @@ class query:
 	
 	def process(self, data):
 		TempTable = my_table()
-      		#FullTable = my_table()
 		for i in range(0, len(data.tables)):
 			if self.fromc[0] == data.tables[i].name:
 				TempTable = data.tables[i]
@@ -99,8 +91,6 @@ class query:
                 		for j in range(0, len(data.tables)):
 					if self.fromc[i] == data.tables[j].name:
 						TempTable = data.cart_prod(TempTable, data.tables[j], self.level)
-		#FullTable.meta = TempTable.meta
-		#FullTable.cols = TempTable.cols
 		for i in range(0, (len(self.wherec))):
           		InterTable = my_table()
 			InterTable.meta = TempTable.meta
@@ -124,20 +114,69 @@ class query:
 							InterTable.rows += 1	
 				TempTable = InterTable             
 				j+=1
-			#FullTable = TempTable
 		return TempTable	
 			
+	def select_cols(self,T):
+		#if selectc[0] != * , iterate through Select Array
+		if self.selectc[0]=='*':
+			return T
+		else:
+			T2 = my_table()
+			colNums = []
+			for i in range(0, len(self.selectc)):
+				sc = self.selectc[i]
+				colin = T.meta.index(sc)
+				if colin not in colNums:
+					colNums.append(colin)
+					T2.cols += 1
+				#if Primary Key Requested, display KC also
+			if (T.cols-1) not in colNums:
+				colNums.append(T.cols-1)
+				T2.cols += 1
+			row = []
+			#Get Meta
+			for i in range(0, len(colNums)):
+				T2.meta.append(T.meta[colNums[i]])
+			for i in range(0, T.rows):
+				for j in range(0, len(colNums)):
+					row.append(T.table[i][colNums[j]])
+				T2.table.append(row)
+				T2.rows += 1
+				row = []
+			#get each index, add that column to new table T2
+			#return T2
+			return T2	
+
+def display_table(T1):
+	print("RESULTS: " )
+	for i in range(0, len(T1.meta)):
+		sys.stdout.write(T1.meta[i] + "\t")
+	print("")
+	for i in range(0, 7*T1.cols):
+		sys.stdout.write("=")
+	print("")
+	for i in range(0, T1.rows):
+		for j in range(0, T1.cols):
+			sys.stdout.write(T1.table[i][j] + "\t")
+		print(" ")
+
 def main():
+	#Read data in from files
 	T1 = my_table("T1.txt","T1")
 	T1.create_table()
 	T2 = my_table("T2.txt","T2")
 	T2.create_table()
 	T3 = my_table("T3.txt","T3")
 	T3.create_table()
+	#Store in DB object	
 	data = db(T1, T2, T3)
+	#Create query object and prompt user
 	Q = query()
 	Q.prompt()
+	#Create result taple and fill with tuples
 	T4 = my_table()
 	T4 = Q.process(data) 
+	#Trim result table to only display columns selected in query 
+	T4 = Q.select_cols(T4) 
 	display_table(T4)
 main()
