@@ -1,6 +1,6 @@
 from scanner import Scanner 
 import sys
-import re
+#import re
 
 class my_table:
 	def __init__(self, file = None, name = None):
@@ -44,15 +44,17 @@ class query:
 		sys.stdout.write("WHERE ")
 		wherec = scan.readline()
 		wherec = wherec.strip()
-    		wherec = wherec.split("and")
-		wheref = []
-		i = 0
-		while (i < len(wherec)):
-			wherec[i] = wherec[i].strip()
-			wheref.append(wherec[i].split("="))
-			i += 1
-		wheref2 = wheref[len(wheref)-1][1].replace(";","")
-		wheref[len(wheref)-1][1] = wheref2
+		if wherec:
+    			wherec = wherec.split("and")
+			wheref = []
+			i = 0
+			while (i < len(wherec)):
+				wherec[i] = wherec[i].strip()
+				wheref.append(wherec[i].split("="))
+				i += 1
+			wheref2 = wheref[len(wheref)-1][1].replace(";","")
+			wheref[len(wheref)-1][1] = wheref2
+			self.wherec = wheref	
 		fromc = fromc.strip()
 		fromc = fromc.split(", ")	
 		selectc = selectc.strip()
@@ -60,19 +62,32 @@ class query:
 		self.level = level
 		self.selectc = selectc
 		self.fromc = fromc
-		self.wherec = wheref	
 	
 	def process(self, data):
 		temp_T = my_table()
+		#retrieve first table
 		for i in range(0, len(data.tables)):
 			if self.fromc[0] == data.tables[i].name:
 				temp_T = data.tables[i]
-				break	
+				break
+		#retrieve 2nd and/or 3rd table and do cartesian product(s)
 		if len(self.fromc) > 1:
 			for i in range(1, (len(self.fromc))):
                 		for j in range(0, len(data.tables)):
 					if self.fromc[i] == data.tables[j].name:
 						temp_T = data.cart_prod(temp_T, data.tables[j], self.level)
+		#if there are no where conditions
+		if not self.wherec:
+			inter_T = my_table()
+			inter_T.meta = temp_T.meta
+			inter_T.cols = temp_T.cols
+			for i in range(0, temp_T.rows):
+				if int(temp_T.table[i][temp_T.cols-1]) <= self.level:
+					row = temp_T.table[i]
+					inter_T.table.append(row)
+					inter_T.rows += 1
+			temp_T = inter_T
+		#process where conditions
 		for i in range(0, (len(self.wherec))):
           		inter_T = my_table()
 			inter_T.meta = temp_T.meta
@@ -80,16 +95,19 @@ class query:
           		for j in range(0, (len(self.wherec[i])-1)):
             			c_1 = self.wherec[i][j]
             			c_2 = self.wherec[i][j+1]
+				#if TC is a where condition and tries to return tuples > its security level 
 				if c_1 == "TC" and int(c_2) > self.level:
 					raise ValueError('Error: Security Level Violation.')
 					sys.exit()	
             			c1_ind = temp_T.meta.index(c_1)
+				#if where clause contains a number
             			if c_2.isdigit():
               				for k in range(0, temp_T.rows):
               					if int(temp_T.table[k][c1_ind]) == int(c_2) and int(temp_T.table[k][temp_T.cols-1]) <= self.level: 
 							row = temp_T.table[k]
               						inter_T.table.append(row)
 							inter_T.rows += 1	
+				#if where clause has column1=column2
             			else:
               				c2_ind = temp_T.meta.index(c_2)
               				for k in range(0, temp_T.rows):
